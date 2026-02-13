@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <!-- Build Configuration -->
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    
+
     <!-- NuGet Package Metadata -->
     <PackageId>YarpAdmin</PackageId>
     <Version>1.0.0</Version>
-    <Authors>Your Name</Authors>
-    <Company>Your Company</Company>
+    <Authors>Ranjeeth Malachira Devaiah</Authors>
+    <Company>Ranjeeth Malachira Devaiah</Company>
     <Product>YARP Admin</Product>
     <Description>A comprehensive administration UI and middleware for YARP (Yet Another Reverse Proxy). Provides a modern React-based dashboard for managing routes, clusters, and destinations with real-time configuration updates.</Description>
     <PackageTags>yarp;reverse-proxy;admin;ui;middleware;aspnetcore;proxy;load-balancer;gateway;api-gateway</PackageTags>
@@ -20,19 +20,18 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <!-- <PackageIcon>icon.png</PackageIcon> -->
-    <Copyright>Copyright © 2024 Your Name</Copyright>
-    
+    <Copyright>Copyright © 2024 Ranjeeth Malachira Devaiah</Copyright>
+
     <!-- Package Settings -->
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    
+
     <!-- Embedded Resources -->
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
-    
+
     <!-- Release Notes -->
     <PackageReleaseNotes>
 v1.0.0:
@@ -43,32 +42,19 @@ v1.0.0:
 - File-based configuration persistence
 - Authentication and authorization support
 - Logging middleware
-- Support for .NET 6, 7, and 8
+- Support for .NET 9 and .NET 10
     </PackageReleaseNotes>
   </PropertyGroup>
 
   <!-- Conditional Package References for Multi-Targeting -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="6.0.0" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.1.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.1.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="8.0.0" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.1.0" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.0" />
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0-*" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0-*" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0" />
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
   </ItemGroup>
 
   <!-- Shared Package References -->

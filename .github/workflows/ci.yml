@@ -20,10 +20,6 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        dotnet-version: ['10.0.x']
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,13 +27,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore YarpAdmin.slnx
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build YarpAdmin.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test YarpAdmin.slnx --configuration Release --no-build --verbosity normal

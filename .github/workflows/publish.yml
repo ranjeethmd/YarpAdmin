@@ -33,21 +33,21 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore YarpAdmin.slnx
 
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build YarpAdmin.slnx --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test YarpAdmin.slnx --configuration Release --no-build --verbosity normal
 
       - name: Pack with version
         if: ${{ inputs.version != '' }}
-        run: dotnet pack --configuration Release --no-build --output ./artifacts -p:PackageVersion=${{ inputs.version }}
+        run: dotnet pack YarpAdmin/YarpAdmin.csproj --configuration Release --no-build --output ./artifacts -p:PackageVersion=${{ inputs.version }}
 
       - name: Pack without version override
         if: ${{ inputs.version == '' }}
-        run: dotnet pack --configuration Release --no-build --output ./artifacts
+        run: dotnet pack YarpAdmin/YarpAdmin.csproj --configuration Release --no-build --output ./artifacts
 
       - name: Push to NuGet
         run: dotnet nuget push ./artifacts/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
