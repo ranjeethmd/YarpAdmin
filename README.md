@@ -333,6 +333,13 @@ yarp-admin/
 │   ├── Services/                 # Admin service and config store
 │   ├── wwwroot/                  # React UI (embedded)
 │   └── YarpAdminExtensions.cs    # DI extensions
+├── YarpAdmin.Tests/              # Unit and integration tests
+│   ├── YarpAdminControllerTests.cs
+│   ├── YarpAdminServiceTests.cs
+│   ├── InMemoryYarpConfigurationStoreTests.cs
+│   ├── YarpAdminExtensionsTests.cs
+│   ├── MiddlewareTests.cs
+│   └── ModelTests.cs
 ├── Example/                      # Example application
 │   └── Program.cs                # Usage example
 └── README.md
@@ -362,11 +369,32 @@ dotnet build
 dotnet run --project Example
 ```
 
+## Running Tests
+
+```bash
+# Run all tests
+dotnet test
+
+# Run tests with coverage
+dotnet test --collect:"XPlat Code Coverage"
+
+# Run tests with detailed output
+dotnet test --verbosity normal
+```
+
+The test suite includes 126 tests covering:
+- **Controller Tests** - API endpoint behavior, validation, and error handling
+- **Service Tests** - Business logic and YARP configuration conversion
+- **Configuration Store Tests** - CRUD operations, persistence, and events
+- **Middleware Tests** - Authentication and logging middleware
+- **Model Tests** - Serialization, default values, and data integrity
+- **Extension Tests** - DI registration and endpoint mapping
+
 ## CI/CD
 
 This project uses GitHub Actions for continuous integration and deployment:
 
-- **CI Workflow** (`ci.yml`) - Runs on every push and pull request to `main`/`master`. Builds, tests, and creates NuGet packages as artifacts.
+- **CI Workflow** (`ci.yml`) - Runs on every push and pull request to `main`/`master`. Builds the solution and runs all tests.
 - **Publish Workflow** (`publish.yml`) - Manual trigger to publish packages to NuGet.org. Go to Actions → "Publish to NuGet" → "Run workflow".
 
 ## Contributing
