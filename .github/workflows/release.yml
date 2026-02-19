@@ -40,7 +40,7 @@ jobs:
         run: dotnet test YarpAdmin.slnx --configuration Release --no-build --verbosity normal
 
       - name: Pack
-        run: dotnet pack YarpAdmin/YarpAdmin.csproj --configuration Release --no-build --output ./artifacts -p:PackageVersion=${{ steps.version.outputs.VERSION }}
+        run: dotnet pack YarpAdmin/YarpAdmin.csproj --configuration Release --no-build --output ./artifacts "-p:PackageVersion=${{ steps.version.outputs.VERSION }}"
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
