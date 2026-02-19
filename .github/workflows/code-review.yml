@@ -1,0 +1,163 @@
+name: Copilot Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  copilot-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.cs
+            **/*.csproj
+
+      - name: Request Copilot Review
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Add Copilot as a reviewer (requires Copilot to be enabled for the repo)
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            // Post a comment to trigger Copilot review
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pull_number,
+              body: `## 🤖 AI Code Review Requested\n\n@copilot please review this pull request.\n\n### Changed Files:\n${process.env.CHANGED_FILES.split(' ').map(f => '- ' + f).join('\n')}`
+            });
+
+            console.log('Copilot review requested for PR #' + pull_number);
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+
+  analyze-code:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore YarpAdmin.slnx
+
+      - name: Build with analyzers
+        run: dotnet build YarpAdmin.slnx --configuration Release --no-restore /p:TreatWarningsAsErrors=false
+
+      - name: Run .NET Format Check
+        run: |
+          dotnet format YarpAdmin.slnx --verify-no-changes --verbosity diagnostic || true
+
+      - name: Security Scan
+        uses: security-devops/codeql-action/analyze@v3
+        continue-on-error: true
+
+  pr-summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [analyze-code]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate PR Summary
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+
+            // Get PR diff stats
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number
+            });
+
+            // Get changed files
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner,
+              repo,
+              pull_number
+            });
+
+            const csFiles = files.filter(f => f.filename.endsWith('.cs'));
+            const additions = files.reduce((sum, f) => sum + f.additions, 0);
+            const deletions = files.reduce((sum, f) => sum + f.deletions, 0);
+
+            const summary = `## 📊 Pull Request Analysis
+
+            | Metric | Value |
+            |--------|-------|
+            | Files Changed | ${files.length} |
+            | C# Files | ${csFiles.length} |
+            | Lines Added | +${additions} |
+            | Lines Removed | -${deletions} |
+
+            ### Files Changed:
+            ${files.slice(0, 20).map(f => \`- \${f.filename} (+\${f.additions}/-\${f.deletions})\`).join('\n')}
+            ${files.length > 20 ? \`\n... and \${files.length - 20} more files\` : ''}
+
+            ---
+            💡 *Request a detailed review by commenting:* \`@copilot review\`
+            `;
+
+            // Check if summary comment already exists
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: pull_number
+            });
+
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('Pull Request Analysis')
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existingComment.id,
+                body: summary
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pull_number,
+                body: summary
+              });
+            }

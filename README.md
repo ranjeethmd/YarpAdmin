@@ -394,6 +394,19 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 - **CI Workflow** (`ci.yml`) - Runs on every push and pull request to `main`/`master`. Builds the solution and runs all tests.
 - **Publish Workflow** (`publish.yml`) - Manual trigger to publish packages to NuGet.org. Go to Actions → "Publish to NuGet" → "Run workflow".
+- **Code Review Workflow** (`code-review.yml`) - Automated AI-powered code review on pull requests:
+  - Requests GitHub Copilot review automatically
+  - Runs static code analysis and .NET format checks
+  - Generates PR summary with file changes and metrics
+  - Comment `@copilot review` on any PR for detailed AI review
+
+### Enabling Copilot Code Review
+
+To enable Copilot code review for your repository:
+
+1. Go to repository **Settings** → **Code security and analysis**
+2. Enable **GitHub Copilot** for code review
+3. Copilot will automatically review pull requests when the workflow runs
 
 ## Contributing
 
