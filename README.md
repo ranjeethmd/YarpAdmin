@@ -347,7 +347,6 @@ yarp-admin/
 
 ## Supported .NET Versions
 
-- .NET 9.0
 - .NET 10.0
 
 ## Building from Source
