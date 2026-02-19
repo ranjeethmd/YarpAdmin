@@ -125,22 +125,24 @@ jobs:
             const additions = files.reduce((sum, f) => sum + f.additions, 0);
             const deletions = files.reduce((sum, f) => sum + f.deletions, 0);
 
+            const fileList = files.slice(0, 20).map(f => `- ${f.filename} (+${f.additions}/-${f.deletions})`).join('\n');
+            const moreFiles = files.length > 20 ? `\n... and ${files.length - 20} more files` : '';
+
             const summary = `## 📊 Pull Request Analysis
 
-            | Metric | Value |
-            |--------|-------|
-            | Files Changed | ${files.length} |
-            | C# Files | ${csFiles.length} |
-            | Lines Added | +${additions} |
-            | Lines Removed | -${deletions} |
+| Metric | Value |
+|--------|-------|
+| Files Changed | ${files.length} |
+| C# Files | ${csFiles.length} |
+| Lines Added | +${additions} |
+| Lines Removed | -${deletions} |
 
-            ### Files Changed:
-            ${files.slice(0, 20).map(f => \`- \${f.filename} (+\${f.additions}/-\${f.deletions})\`).join('\n')}
-            ${files.length > 20 ? \`\n... and \${files.length - 20} more files\` : ''}
+### Files Changed:
+${fileList}${moreFiles}
 
-            ---
-            💡 *Request a detailed review by commenting:* \`@copilot review\`
-            `;
+---
+💡 *Request a detailed review by commenting:* \`@copilot review\`
+`;
 
             // Check if summary comment already exists
             const { data: comments } = await github.rest.issues.listComments({
