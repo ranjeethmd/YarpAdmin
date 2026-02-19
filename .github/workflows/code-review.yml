@@ -1,13 +1,8 @@
 name: Copilot Code Review
 
 on:
-  push:
-    branches:
-      - '**'
   pull_request:
     types: [opened, synchronize, reopened]
-  pull_request_review_comment:
-    types: [created]
 
 permissions:
   contents: write
@@ -19,7 +14,6 @@ jobs:
   copilot-review:
     name: AI Code Review
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout repository
@@ -80,72 +74,23 @@ jobs:
         run: |
           dotnet format YarpAdmin.slnx --verify-no-changes --verbosity diagnostic || true
 
-      - name: Security Scan
-        uses: security-devops/codeql-action/analyze@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
         continue-on-error: true
 
-  push-review:
-    name: Push Code Review
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    needs: [analyze-code]
+      - name: Build for CodeQL
+        run: dotnet build YarpAdmin.slnx --configuration Release --no-restore
+        continue-on-error: true
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Get changed files
-        id: changed-files
-        run: |
-          FILES=$(git diff --name-only HEAD~1 HEAD -- '*.cs' '*.csproj' 2>/dev/null || echo "")
-          echo "files=$FILES" >> $GITHUB_OUTPUT
-          if [ -n "$FILES" ]; then
-            echo "any_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "any_changed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Post commit review comment
-        if: steps.changed-files.outputs.any_changed == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { owner, repo } = context.repo;
-            const sha = context.sha;
-            const branch = context.ref.replace('refs/heads/', '');
-            const changedFiles = process.env.CHANGED_FILES || '';
-            const fileList = changedFiles.split('\n').filter(f => f.trim()).map(f => `- ${f}`).join('\n');
-
-            const body = `## Code Review - Push to \`${branch}\`
-
-            **Commit:** ${sha.substring(0, 7)}
-            **Branch:** ${branch}
-
-            ### Changed Files:
-            ${fileList || 'No C# files changed'}
-
-            ---
-            @copilot please review the changes in this commit.
-            `;
-
-            await github.rest.repos.createCommitComment({
-              owner,
-              repo,
-              commit_sha: sha,
-              body: body
-            });
-
-            console.log('Code review requested for commit ' + sha);
-        env:
-          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
 
   pr-summary:
     name: PR Summary
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     needs: [analyze-code]
 
     steps:
