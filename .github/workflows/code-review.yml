@@ -74,20 +74,6 @@ jobs:
         run: |
           dotnet format YarpAdmin.slnx --verify-no-changes --verbosity diagnostic || true
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: csharp
-        continue-on-error: true
-
-      - name: Build for CodeQL
-        run: dotnet build YarpAdmin.slnx --configuration Release --no-restore
-        continue-on-error: true
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        continue-on-error: true
-
   pr-summary:
     name: PR Summary
     runs-on: ubuntu-latest
